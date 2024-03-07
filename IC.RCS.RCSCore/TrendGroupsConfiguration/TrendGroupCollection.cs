@@ -60,7 +60,7 @@ namespace IC.RCS.RCSCore
         // specified element
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((TrendGroupElement)element).Name;
+            return ((TrendGroupElement)element).Guid;
         }
         public void Add(TrendGroupElement element)
         {

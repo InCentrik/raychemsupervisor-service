@@ -20,7 +20,7 @@ namespace IC.RCS.RCSService
     {
         static void Main(string[] args)
         {
-            bool IsDebugState = true;
+            bool IsDebugState = false;
 
             if (Environment.UserInteractive && !IsDebugState)
             {
@@ -52,14 +52,16 @@ namespace IC.RCS.RCSService
 
                     //System.Diagnostics.Debugger.Launch();
                     Console.WriteLine("Debug mode...");
-                    RCSCore.EHTSQLClient sqlClient = new RCSCore.EHTSQLClient(".\\SQLExpress", "ehtplus", "ehtTransferService", "ehtTransferService");
+                    EHTSQLClient sqlClient = new EHTSQLClient(".\\SQLExpress", "ehtplus", "ehtTransferService", "ehtTransferService");
 
-                    RCSCore.TrendGroupConfigReaderWriter trendGroupConfigReaderWriter = new RCSCore.TrendGroupConfigReaderWriter(null);
-                    RCSCore.RCSWCFService wcfService = new RCSCore.RCSWCFService();
+                    TrendGroupConfigReaderWriter trendGroupConfigReaderWriter = new TrendGroupConfigReaderWriter(null);
+                    RCSWCFService wcfService = new RCSWCFService();
 
-                    ServiceHost host = new ServiceHost(typeof(RCSCore.RCSWCFService), new Uri[] { new Uri("net.pipe://localhost") });
-                    host.AddServiceEndpoint(typeof(RCSCore.IRCSWCFService), new NetNamedPipeBinding(), "PipeReverse");
+
+                    ServiceHost host = new ServiceHost(typeof(RCSWCFService), new Uri[] { new Uri("net.pipe://localhost") });
+                    host.AddServiceEndpoint(typeof(IRCSWCFService), new NetNamedPipeBinding(), "PipeReverse");
                     host.Open();
+
                     Console.WriteLine("Done. Press enter to close.");
                     Console.ReadLine();
 

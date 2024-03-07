@@ -24,10 +24,6 @@ namespace IC.RCS.RCSService
 
         protected override void OnStart(string[] args)
         {
-            sqlClient = new RCSCore.EHTSQLClient(".\\SQLExpress", "ehtplus", "ehtTransferService", "ehtTransferService");
-
-            RCSCore.TrendGroupConfigReaderWriter trendGroupConfigReaderWriter = new RCSCore.TrendGroupConfigReaderWriter(null);
-            RCSCore.RCSWCFService wcfService = new RCSCore.RCSWCFService();
 
             host = new ServiceHost(typeof(RCSCore.RCSWCFService), new Uri[] { new Uri("net.pipe://localhost") });
             host.AddServiceEndpoint(typeof(RCSCore.IRCSWCFService), new NetNamedPipeBinding(), "PipeReverse");
@@ -37,7 +33,13 @@ namespace IC.RCS.RCSService
 
         protected override void OnStop()
         {
-            host.Close();
+            try 
+            { 
+                host.Close(); 
+            } catch 
+            { 
+            
+            }
         }
     }
 }

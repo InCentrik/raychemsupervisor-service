@@ -51,6 +51,12 @@
             this.txtSQLServer = new System.Windows.Forms.TextBox();
             this.tabTrendGroups = new System.Windows.Forms.TabPage();
             this.dataGridViewTrendGroups = new System.Windows.Forms.DataGridView();
+            this.trendGroupSelected = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.trendGroupName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.trendGroupScanRate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.trendGroupDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.trendGroupGuid = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.trendGroupLastRefreshTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.buttonTrendGroupsPullFromSQL = new System.Windows.Forms.Button();
             this.buttonTrendGroupsSave = new System.Windows.Forms.Button();
             this.buttonTrendGroupsRefresh = new System.Windows.Forms.Button();
@@ -67,12 +73,6 @@
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stopToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.trendGroupSelected = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.trendGroupName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.trendGroupScanRate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.trendGroupDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.trendGroupGuid = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.trendGroupLastRefreshTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabService.SuspendLayout();
@@ -110,7 +110,6 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(806, 404);
             this.tabControl1.TabIndex = 1;
-            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
             // 
             // tabService
             // 
@@ -137,7 +136,6 @@
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Logging";
-            this.groupBox3.Enter += new System.EventHandler(this.groupBox3_Enter);
             // 
             // txtPathToLogDirectory
             // 
@@ -181,17 +179,16 @@
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Commands";
-            this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
             // 
             // serviceConnectionStatusText
             // 
             this.serviceConnectionStatusText.AutoSize = true;
             this.serviceConnectionStatusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.serviceConnectionStatusText.Location = new System.Drawing.Point(510, 68);
+            this.serviceConnectionStatusText.Location = new System.Drawing.Point(438, 68);
             this.serviceConnectionStatusText.Name = "serviceConnectionStatusText";
-            this.serviceConnectionStatusText.Size = new System.Drawing.Size(191, 16);
+            this.serviceConnectionStatusText.Size = new System.Drawing.Size(102, 16);
             this.serviceConnectionStatusText.TabIndex = 9;
-            this.serviceConnectionStatusText.Text = "Disconnected from service";
+            this.serviceConnectionStatusText.Text = "Disconnected";
             this.serviceConnectionStatusText.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // buttonCheckServiceConnection
@@ -208,7 +205,7 @@
             // serviceStatusLabel
             // 
             this.serviceStatusLabel.AutoSize = true;
-            this.serviceStatusLabel.Location = new System.Drawing.Point(558, 39);
+            this.serviceStatusLabel.Location = new System.Drawing.Point(443, 42);
             this.serviceStatusLabel.Name = "serviceStatusLabel";
             this.serviceStatusLabel.Size = new System.Drawing.Size(93, 16);
             this.serviceStatusLabel.TabIndex = 2;
@@ -257,11 +254,11 @@
             // 
             this.sqlConnectionStatusText.AutoSize = true;
             this.sqlConnectionStatusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.sqlConnectionStatusText.Location = new System.Drawing.Point(510, 77);
+            this.sqlConnectionStatusText.Location = new System.Drawing.Point(572, 68);
             this.sqlConnectionStatusText.Name = "sqlConnectionStatusText";
-            this.sqlConnectionStatusText.Size = new System.Drawing.Size(191, 16);
+            this.sqlConnectionStatusText.Size = new System.Drawing.Size(102, 16);
             this.sqlConnectionStatusText.TabIndex = 8;
-            this.sqlConnectionStatusText.Text = "Disconnected from service";
+            this.sqlConnectionStatusText.Text = "Disconnected";
             this.sqlConnectionStatusText.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // label3
@@ -273,7 +270,6 @@
             this.label3.Size = new System.Drawing.Size(70, 16);
             this.label3.TabIndex = 7;
             this.label3.Text = "Password:";
-            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // label2
             // 
@@ -284,7 +280,6 @@
             this.label2.Size = new System.Drawing.Size(73, 16);
             this.label2.TabIndex = 6;
             this.label2.Text = "Username:";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // txtSQLPassword
             // 
@@ -293,7 +288,7 @@
             this.txtSQLPassword.Margin = new System.Windows.Forms.Padding(2);
             this.txtSQLPassword.Name = "txtSQLPassword";
             this.txtSQLPassword.PasswordChar = '*';
-            this.txtSQLPassword.Size = new System.Drawing.Size(325, 22);
+            this.txtSQLPassword.Size = new System.Drawing.Size(157, 22);
             this.txtSQLPassword.TabIndex = 5;
             this.txtSQLPassword.Text = "EHTTransferService";
             // 
@@ -302,14 +297,14 @@
             this.txtSQLUsername.Location = new System.Drawing.Point(169, 52);
             this.txtSQLUsername.Margin = new System.Windows.Forms.Padding(2);
             this.txtSQLUsername.Name = "txtSQLUsername";
-            this.txtSQLUsername.Size = new System.Drawing.Size(325, 22);
+            this.txtSQLUsername.Size = new System.Drawing.Size(157, 22);
             this.txtSQLUsername.TabIndex = 4;
             this.txtSQLUsername.Text = "EHTTransferService";
             this.txtSQLUsername.TextChanged += new System.EventHandler(this.txtSQLUsername_TextChanged);
             // 
             // buttonCheckSQLConnection
             // 
-            this.buttonCheckSQLConnection.Location = new System.Drawing.Point(513, 25);
+            this.buttonCheckSQLConnection.Location = new System.Drawing.Point(538, 25);
             this.buttonCheckSQLConnection.Margin = new System.Windows.Forms.Padding(2);
             this.buttonCheckSQLConnection.Name = "buttonCheckSQLConnection";
             this.buttonCheckSQLConnection.Size = new System.Drawing.Size(171, 26);
@@ -333,10 +328,9 @@
             this.txtSQLServer.Location = new System.Drawing.Point(169, 27);
             this.txtSQLServer.Margin = new System.Windows.Forms.Padding(2);
             this.txtSQLServer.Name = "txtSQLServer";
-            this.txtSQLServer.Size = new System.Drawing.Size(325, 22);
+            this.txtSQLServer.Size = new System.Drawing.Size(157, 22);
             this.txtSQLServer.TabIndex = 0;
-            this.txtSQLServer.Text = ".\\SQLExpress01";
-            this.txtSQLServer.TextChanged += new System.EventHandler(this.txSQLServer_TextChanged);
+            this.txtSQLServer.Text = ".\\SQLExpress";
             // 
             // tabTrendGroups
             // 
@@ -355,6 +349,9 @@
             // 
             // dataGridViewTrendGroups
             // 
+            this.dataGridViewTrendGroups.AllowUserToAddRows = false;
+            this.dataGridViewTrendGroups.AllowUserToDeleteRows = false;
+            this.dataGridViewTrendGroups.AllowUserToOrderColumns = true;
             this.dataGridViewTrendGroups.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
             this.dataGridViewTrendGroups.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridViewTrendGroups.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -370,6 +367,52 @@
             this.dataGridViewTrendGroups.RowTemplate.Height = 24;
             this.dataGridViewTrendGroups.Size = new System.Drawing.Size(767, 313);
             this.dataGridViewTrendGroups.TabIndex = 4;
+            // 
+            // trendGroupSelected
+            // 
+            this.trendGroupSelected.HeaderText = "Monitored";
+            this.trendGroupSelected.MinimumWidth = 6;
+            this.trendGroupSelected.Name = "trendGroupSelected";
+            this.trendGroupSelected.Width = 73;
+            // 
+            // trendGroupName
+            // 
+            this.trendGroupName.HeaderText = "Trend Group Name";
+            this.trendGroupName.MinimumWidth = 6;
+            this.trendGroupName.Name = "trendGroupName";
+            this.trendGroupName.ReadOnly = true;
+            this.trendGroupName.Width = 139;
+            // 
+            // trendGroupScanRate
+            // 
+            this.trendGroupScanRate.HeaderText = "Scan Rate (s)";
+            this.trendGroupScanRate.MinimumWidth = 6;
+            this.trendGroupScanRate.Name = "trendGroupScanRate";
+            this.trendGroupScanRate.Width = 94;
+            // 
+            // trendGroupDescription
+            // 
+            this.trendGroupDescription.HeaderText = "Description";
+            this.trendGroupDescription.MinimumWidth = 6;
+            this.trendGroupDescription.Name = "trendGroupDescription";
+            this.trendGroupDescription.ReadOnly = true;
+            this.trendGroupDescription.Width = 104;
+            // 
+            // trendGroupGuid
+            // 
+            this.trendGroupGuid.HeaderText = "GUID";
+            this.trendGroupGuid.MinimumWidth = 6;
+            this.trendGroupGuid.Name = "trendGroupGuid";
+            this.trendGroupGuid.ReadOnly = true;
+            this.trendGroupGuid.Width = 69;
+            // 
+            // trendGroupLastRefreshTime
+            // 
+            this.trendGroupLastRefreshTime.HeaderText = "Last Refresh Time";
+            this.trendGroupLastRefreshTime.MinimumWidth = 6;
+            this.trendGroupLastRefreshTime.Name = "trendGroupLastRefreshTime";
+            this.trendGroupLastRefreshTime.ReadOnly = true;
+            this.trendGroupLastRefreshTime.Width = 133;
             // 
             // buttonTrendGroupsPullFromSQL
             // 
@@ -470,7 +513,7 @@
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(116, 26);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -487,73 +530,23 @@
             // setupTrendGroupsToolStripMenuItem
             // 
             this.setupTrendGroupsToolStripMenuItem.Name = "setupTrendGroupsToolStripMenuItem";
-            this.setupTrendGroupsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.setupTrendGroupsToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.setupTrendGroupsToolStripMenuItem.Text = "Setup TrendGroups";
             this.setupTrendGroupsToolStripMenuItem.Click += new System.EventHandler(this.setupTrendGroupsToolStripMenuItem_Click);
             // 
             // startToolStripMenuItem
             // 
             this.startToolStripMenuItem.Name = "startToolStripMenuItem";
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.startToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.startToolStripMenuItem.Text = "Start";
             this.startToolStripMenuItem.Click += new System.EventHandler(this.startToolStripMenuItem_Click);
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(218, 26);
             this.stopToolStripMenuItem.Text = "Stop";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.stopToolStripMenuItem_Click);
-            // 
-            // folderBrowserDialog1
-            // 
-            this.folderBrowserDialog1.HelpRequest += new System.EventHandler(this.folderBrowserDialog1_HelpRequest);
-            // 
-            // trendGroupSelected
-            // 
-            this.trendGroupSelected.HeaderText = "Monitored";
-            this.trendGroupSelected.MinimumWidth = 6;
-            this.trendGroupSelected.Name = "trendGroupSelected";
-            this.trendGroupSelected.Width = 73;
-            // 
-            // trendGroupName
-            // 
-            this.trendGroupName.HeaderText = "Trend Group Name";
-            this.trendGroupName.MinimumWidth = 6;
-            this.trendGroupName.Name = "trendGroupName";
-            this.trendGroupName.ReadOnly = true;
-            this.trendGroupName.Width = 139;
-            // 
-            // trendGroupScanRate
-            // 
-            this.trendGroupScanRate.HeaderText = "Scan Rate (s)";
-            this.trendGroupScanRate.MinimumWidth = 6;
-            this.trendGroupScanRate.Name = "trendGroupScanRate";
-            this.trendGroupScanRate.Width = 94;
-            // 
-            // trendGroupDescription
-            // 
-            this.trendGroupDescription.HeaderText = "Description";
-            this.trendGroupDescription.MinimumWidth = 6;
-            this.trendGroupDescription.Name = "trendGroupDescription";
-            this.trendGroupDescription.ReadOnly = true;
-            this.trendGroupDescription.Width = 104;
-            // 
-            // trendGroupGuid
-            // 
-            this.trendGroupGuid.HeaderText = "GUID";
-            this.trendGroupGuid.MinimumWidth = 6;
-            this.trendGroupGuid.Name = "trendGroupGuid";
-            this.trendGroupGuid.ReadOnly = true;
-            this.trendGroupGuid.Width = 69;
-            // 
-            // trendGroupLastRefreshTime
-            // 
-            this.trendGroupLastRefreshTime.HeaderText = "Last Refresh Time";
-            this.trendGroupLastRefreshTime.MinimumWidth = 6;
-            this.trendGroupLastRefreshTime.Name = "trendGroupLastRefreshTime";
-            this.trendGroupLastRefreshTime.ReadOnly = true;
-            this.trendGroupLastRefreshTime.Width = 133;
             // 
             // RCSForm
             // 
@@ -568,8 +561,9 @@
             this.Name = "RCSForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Raychem Supervisor Trend Data Table Transfer Utility";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Activated += new System.EventHandler(this.RCSForm_Activated);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RCSForm_FormClosing);
+            this.Load += new System.EventHandler(this.RCSForm_Load);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.tabControl1.ResumeLayout(false);

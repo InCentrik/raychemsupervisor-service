@@ -10,6 +10,7 @@ using System.Text;
 using System.Drawing.Text;
 using System.CodeDom;
 using static System.Net.Mime.MediaTypeNames;
+using System.ServiceModel.Security;
 
 namespace IC.RCS.RCSForm
 {
@@ -20,20 +21,52 @@ namespace IC.RCS.RCSForm
 
         public RCSForm()
         {
-            
+
             var binding = new NetNamedPipeBinding();
             var endpoint = new EndpointAddress("net.pipe://localhost/Design_Time_Addresses/IC.RCS.RCSCore/RCSCore");
             myChannelFactory = new ChannelFactory<IRCSWCFService>(new NetNamedPipeBinding(), new EndpointAddress("net.pipe://localhost/PipeReverse"));
 
             InitializeComponent();
+
         }
 
-        private RCSCore.TrendGroupConfig GetTrendGroupsConfig()
+        private TrendGroupConfig GetTrendGroupsConfig()
         {
             IRCSWCFService client = myChannelFactory.CreateChannel();
             string serviceExePath = client.GetExePath();
             Configuration config = ConfigurationManager.OpenExeConfiguration(serviceExePath);
-            return (RCSCore.TrendGroupConfig)config.GetSection("trendGroupsConfig");
+            return (TrendGroupConfig)config.GetSection("trendGroupsConfig");
+        }
+
+        private void GetSqlClientConnectionCredentials()
+        {
+            try
+            {
+                IRCSWCFService client = myChannelFactory.CreateChannel();
+                string serviceExePath = client.GetExePath();
+                Configuration config = ConfigurationManager.OpenExeConfiguration(serviceExePath);
+
+                txtSQLServer.Text = config.AppSettings.Settings["servername"].Value;
+                txtSQLUsername.Text = config.AppSettings.Settings["username"].Value;
+                txtSQLPassword.Text = config.AppSettings.Settings["password"].Value;
+            } catch
+            {
+
+            }
+            
+        }
+
+        private void SetSqlClientConnectionCredentials(string serverName, string databaseName, string userName, string password)
+        {
+            IRCSWCFService client = myChannelFactory.CreateChannel();
+            string serviceExePath = client.GetExePath();
+            Configuration config = ConfigurationManager.OpenExeConfiguration(serviceExePath);
+
+            config.AppSettings.Settings["servername"].Value = txtSQLServer.Text;
+            config.AppSettings.Settings["username"].Value = txtSQLUsername.Text;
+            config.AppSettings.Settings["password"].Value = txtSQLPassword.Text;
+
+            config.Save();
         }
 
         private void ConvertTrendGroupConfigToDataGridView()
@@ -72,7 +105,7 @@ namespace IC.RCS.RCSForm
 
             foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
             {
-                trendGroup.IsMonitored = dataGridViewTrendGroups.Rows[i].Cells[0].Value.ToString().ToLower(); 
+                trendGroup.IsMonitored = dataGridViewTrendGroups.Rows[i].Cells[0].Value.ToString().ToLower();
                 trendGroup.ScanRate = dataGridViewTrendGroups.Rows[i].Cells[2].Value.ToString().ToLower();
                 //dataGridViewTrendGroups.Rows[i].Cells[1].Value = trendGroup.Name;
                 //dataGridViewTrendGroups.Rows[i].Cells[2].Value = trendGroup.Description;
@@ -84,7 +117,7 @@ namespace IC.RCS.RCSForm
             config.Save();
         }
 
-            private ServiceConnectionStatusEnum CheckServiceConnection()
+        private ServiceConnectionStatusEnum CheckServiceConnection()
         {
             bool serviceOn = true;
             bool wcfServiceConnected = true;
@@ -92,12 +125,14 @@ namespace IC.RCS.RCSForm
             try
             {
                 bool canStop = serviceController.CanStop;
-            } catch
+            }
+            catch
             {
                 serviceOn = false;
             }
 
-            try {
+            try
+            {
                 var trendGroupsConfig = GetTrendGroupsConfig();
                 foreach (RCSCore.TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
                 {
@@ -105,43 +140,19 @@ namespace IC.RCS.RCSForm
                 }
                 wcfServiceConnected = true;
             }
-            catch(Exception ex) {
+            catch (Exception ex)
+            {
                 serviceOn = false;
             }
 
             int serviceOnInt = serviceOn ? 1 : 0;
             int wcfServiceConnectedInt = wcfServiceConnected ? 1 : 0;
 
-            return (ServiceConnectionStatusEnum) serviceOnInt + wcfServiceConnectedInt;
+            return (ServiceConnectionStatusEnum)serviceOnInt + wcfServiceConnectedInt;
 
         }
 
-        private void buttonCheckServiceConnection_Click(object sender, EventArgs e)
-        {
-            string connectionStatusText;
-
-            ServiceConnectionStatusEnum serviceConnectionStatus = CheckServiceConnection();
-            switch (serviceConnectionStatus)
-            {
-                case ServiceConnectionStatusEnum.Connected:
-                    connectionStatusText = "Connected to service";
-                    break;
-                case ServiceConnectionStatusEnum.CommunicationOff:
-                    connectionStatusText = "Service is disconnected from GUI";
-                    break;
-                case ServiceConnectionStatusEnum.Disconnected:
-                    connectionStatusText = "Service connected";
-                    break;
-                default:
-                    connectionStatusText = "ERROR";
-                    break;
-            }
-
-            serviceConnectionStatusText.Text = connectionStatusText;
-            
-        }
-
-        private void btCheckSQLConnection_Click(object sender, EventArgs e)
+        private void CheckServiceSqlConnection()
         {
             string connectionStatusText;
             string username = txtSQLUsername.Text;
@@ -153,35 +164,72 @@ namespace IC.RCS.RCSForm
             if (serviceConnectionStatus == ServiceConnectionStatusEnum.Connected)
             {
                 IRCSWCFService client = myChannelFactory.CreateChannel();
-                if (client.ConfigureSQLConnection(serverName,"ehtplus",username,password))
+                if (client.ConfigureSQLConnection(serverName, "ehtplus", username, password))
                 {
-                    connectionStatusText = "SQL connected to service";
-                } else
-                {
-                    connectionStatusText = "SQL connection failed";
+                    connectionStatusText = "Connected";
                 }
-            } else
+                else
+                {
+                    connectionStatusText = "Failed";
+                }
+            }
+            else
             {
-                connectionStatusText = "No connection from GUI to service";
-            } 
+                connectionStatusText = "Disconnected";
+            }
 
             sqlConnectionStatusText.Text = connectionStatusText;
+        }
 
+        private void buttonCheckServiceConnection_Click(object sender, EventArgs e)
+        {
+            string connectionStatusText;
+
+            ServiceConnectionStatusEnum serviceConnectionStatus = CheckServiceConnection();
+            switch (serviceConnectionStatus)
+            {
+                case ServiceConnectionStatusEnum.Connected:
+                    connectionStatusText = "Connected";
+                    break;
+                case ServiceConnectionStatusEnum.CommunicationOff:
+                    connectionStatusText = "Disconnected";
+                    break;
+                case ServiceConnectionStatusEnum.Disconnected:
+                    connectionStatusText = "Disconnected";
+                    break;
+                default:
+                    connectionStatusText = "ERROR";
+                    break;
+            }
+
+            serviceConnectionStatusText.Text = connectionStatusText;
 
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        private void btCheckSQLConnection_Click(object sender, EventArgs e)
         {
-            
-        }
 
-        private void btStartStopMonitor_Click(object sender, EventArgs e)
-        {
+            CheckServiceSqlConnection();
 
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void RCSForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+
+        }
+
+        private void RCSForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RCSForm_Activated(object sender, EventArgs e)
+        {
+            buttonCheckServiceConnection.PerformClick();
+            CheckServiceSqlConnection();
+            GetSqlClientConnectionCredentials();
+            ConvertTrendGroupConfigToDataGridView();
+
         }
 
         #region worker thread
@@ -301,7 +349,7 @@ namespace IC.RCS.RCSForm
 
         private void setupTrendGroupsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-          
+
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -309,65 +357,10 @@ namespace IC.RCS.RCSForm
         }
         #endregion
 
-        private void cbScanInterval_SelectedIndexChanged(object sender, EventArgs e)
-        {
-        }
-
-        private void cbDeleteOldestDay_SelectedIndexChanged(object sender, EventArgs e)
-        {
-        }
-
-        private void txSQLServer_TextChanged(object sender, EventArgs e)
-        {
-        }
-
-        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupBox2_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label5_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupBox3_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void folderBrowserDialog1_HelpRequest(object sender, EventArgs e)
-        {
-
-        }
 
         private void buttonChooseLogFolderDirectory_Click(object sender, EventArgs e)
         {
-            if(folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
                 txtPathToLogDirectory.Text = folderBrowserDialog1.SelectedPath;
             }
@@ -376,10 +369,12 @@ namespace IC.RCS.RCSForm
         private void buttonStartService_Click(object sender, EventArgs e)
         {
             //TODO: FIGURE OUT WHY NOT WORKING
-            try {
+            try
+            {
                 serviceController.Start();
-            } 
-            catch {
+            }
+            catch
+            {
 
             }
         }
@@ -405,7 +400,6 @@ namespace IC.RCS.RCSForm
 
         private void buttonTrendGroupsRefresh_Click(object sender, EventArgs e)
         {
-            TrendGroupConfig trendGroupConfig = GetTrendGroupsConfig();
             ConvertTrendGroupConfigToDataGridView();
         }
 
@@ -422,7 +416,7 @@ namespace IC.RCS.RCSForm
             string databaseName = "ehtplus";
 
             IRCSWCFService client = myChannelFactory.CreateChannel();
-            client.PullTrendGroupsFromSQL(serverName,databaseName,username,password);
+            client.PullTrendGroupsFromSQL(serverName, databaseName, username, password);
             ConvertTrendGroupConfigToDataGridView();
         }
     }

@@ -65,8 +65,8 @@
     <Compile Include="TrendGroupsConfiguration\TrendGroupConfig.cs" />
     <Compile Include="TrendGroupsConfiguration\TrendGroupConfigReaderWriter.cs" />
     <Compile Include="TrendGroupsConfiguration\TrendGroupElement.cs" />
-    <Compile Include="WCF\IRCSWCFService.cs" />
-    <Compile Include="WCF\RCSWCFService.cs" />
+    <Compile Include="WCFService\IRCSWCFService.cs" />
+    <Compile Include="WCFService\RCSWCFService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
