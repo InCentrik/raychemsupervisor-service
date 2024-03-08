@@ -54,6 +54,7 @@
             this.trendGroupSelected = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.trendGroupName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.trendGroupScanRate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.PullDays = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.trendGroupDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.trendGroupGuid = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.trendGroupLastRefreshTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -61,7 +62,7 @@
             this.buttonTrendGroupsSave = new System.Windows.Forms.Button();
             this.buttonTrendGroupsRefresh = new System.Windows.Forms.Button();
             this.tabLog = new System.Windows.Forms.TabPage();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.txtBoxLog = new System.Windows.Forms.RichTextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
@@ -358,6 +359,7 @@
             this.trendGroupSelected,
             this.trendGroupName,
             this.trendGroupScanRate,
+            this.PullDays,
             this.trendGroupDescription,
             this.trendGroupGuid,
             this.trendGroupLastRefreshTime});
@@ -389,6 +391,13 @@
             this.trendGroupScanRate.MinimumWidth = 6;
             this.trendGroupScanRate.Name = "trendGroupScanRate";
             this.trendGroupScanRate.Width = 94;
+            // 
+            // PullDays
+            // 
+            this.PullDays.HeaderText = "Time Span (d)";
+            this.PullDays.MinimumWidth = 6;
+            this.PullDays.Name = "PullDays";
+            this.PullDays.Width = 97;
             // 
             // trendGroupDescription
             // 
@@ -446,7 +455,7 @@
             // 
             // tabLog
             // 
-            this.tabLog.Controls.Add(this.richTextBox1);
+            this.tabLog.Controls.Add(this.txtBoxLog);
             this.tabLog.Location = new System.Drawing.Point(4, 25);
             this.tabLog.Margin = new System.Windows.Forms.Padding(2);
             this.tabLog.Name = "tabLog";
@@ -455,15 +464,15 @@
             this.tabLog.Text = "Log";
             this.tabLog.UseVisualStyleBackColor = true;
             // 
-            // richTextBox1
+            // txtBoxLog
             // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(0, 0);
-            this.richTextBox1.Margin = new System.Windows.Forms.Padding(2);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(798, 375);
-            this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = "";
+            this.txtBoxLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtBoxLog.Location = new System.Drawing.Point(0, 0);
+            this.txtBoxLog.Margin = new System.Windows.Forms.Padding(2);
+            this.txtBoxLog.Name = "txtBoxLog";
+            this.txtBoxLog.Size = new System.Drawing.Size(798, 375);
+            this.txtBoxLog.TabIndex = 0;
+            this.txtBoxLog.Text = "";
             // 
             // statusStrip1
             // 
@@ -561,7 +570,7 @@
             this.Name = "RCSForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Raychem Supervisor Trend Data Table Transfer Utility";
-            this.Activated += new System.EventHandler(this.RCSForm_Activated);
+            this.Shown += new System.EventHandler(this.RCSForm_Shown);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RCSForm_FormClosing);
             this.Load += new System.EventHandler(this.RCSForm_Load);
             this.panel1.ResumeLayout(false);
@@ -605,7 +614,7 @@
         private System.Windows.Forms.ToolStripMenuItem operationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
         private System.Windows.Forms.TabPage tabLog;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.RichTextBox txtBoxLog;
         private System.Windows.Forms.ToolStripMenuItem stopToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem setupTrendGroupsToolStripMenuItem;
         private System.Windows.Forms.Label label2;
@@ -631,6 +640,7 @@
         private System.Windows.Forms.DataGridViewCheckBoxColumn trendGroupSelected;
         private System.Windows.Forms.DataGridViewTextBoxColumn trendGroupName;
         private System.Windows.Forms.DataGridViewTextBoxColumn trendGroupScanRate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn PullDays;
         private System.Windows.Forms.DataGridViewTextBoxColumn trendGroupDescription;
         private System.Windows.Forms.DataGridViewTextBoxColumn trendGroupGuid;
         private System.Windows.Forms.DataGridViewTextBoxColumn trendGroupLastRefreshTime;

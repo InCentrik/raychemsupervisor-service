@@ -89,7 +89,6 @@ namespace IC.RCS.RCSCore
             catch (SqlException sqlex)
             {
                 rc = false;
-                System.Diagnostics.Trace.WriteLine(sqlex.Message);
             }
             finally
             {

@@ -32,7 +32,7 @@ namespace IC.RCS.RCSCore
             return System.Reflection.Assembly.GetEntryAssembly().Location;
         }
 
-        public bool ConfigureSQLConnection(string serverName, string databaseName, string username, string password)
+        public bool TestSQLCredentials(string serverName, string databaseName, string username, string password)
         {
             bool isConnected = false;
 

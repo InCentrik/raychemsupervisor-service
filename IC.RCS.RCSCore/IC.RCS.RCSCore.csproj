@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -57,6 +58,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FormWCFService\RCSFormWCFService.cs" />
+    <Compile Include="FormWCFService\IFormWCFService.cs" />
     <Compile Include="TransferServiceCore.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="EHTSQLClient.cs" />

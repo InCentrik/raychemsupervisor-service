@@ -24,9 +24,11 @@ namespace IC.RCS.RCSService
 
         protected override void OnStart(string[] args)
         {
+            RCSWCFService service = new RCSWCFService();
 
-            host = new ServiceHost(typeof(RCSCore.RCSWCFService), new Uri[] { new Uri("net.pipe://localhost") });
-            host.AddServiceEndpoint(typeof(RCSCore.IRCSWCFService), new NetNamedPipeBinding(), "PipeReverse");
+            host = new ServiceHost(service, new Uri[] { new Uri("net.pipe://localhost") });
+            host.Description.Behaviors.Find<ServiceBehaviorAttribute>().InstanceContextMode = InstanceContextMode.Single;
+            host.AddServiceEndpoint(typeof(IRCSWCFService), new NetNamedPipeBinding(), "RCSTransferService");
             host.Open();
 
         }

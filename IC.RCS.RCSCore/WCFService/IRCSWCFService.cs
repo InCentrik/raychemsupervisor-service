@@ -20,7 +20,7 @@ namespace IC.RCS.RCSCore
         string GetExePath();
 
         [OperationContract]
-        bool ConfigureSQLConnection(string serverName, string databaseName, string username, string password);
+        bool TestSQLCredentials(string serverName, string databaseName, string username, string password);
 
         [OperationContract]
         void PullTrendGroupsFromSQL(string serverName, string databaseName, string username, string password);

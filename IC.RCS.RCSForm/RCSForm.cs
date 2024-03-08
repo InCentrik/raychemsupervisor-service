@@ -11,6 +11,7 @@ using System.Drawing.Text;
 using System.CodeDom;
 using static System.Net.Mime.MediaTypeNames;
 using System.ServiceModel.Security;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace IC.RCS.RCSForm
 {
@@ -18,24 +19,42 @@ namespace IC.RCS.RCSForm
     {
         public ChannelFactory<IRCSWCFService> myChannelFactory;
         public ServiceController serviceController = new ServiceController("RCSTransferService");
+        private ServiceHost _formServiceHost;
 
         public RCSForm()
         {
-
-            var binding = new NetNamedPipeBinding();
-            var endpoint = new EndpointAddress("net.pipe://localhost/Design_Time_Addresses/IC.RCS.RCSCore/RCSCore");
-            myChannelFactory = new ChannelFactory<IRCSWCFService>(new NetNamedPipeBinding(), new EndpointAddress("net.pipe://localhost/PipeReverse"));
 
             InitializeComponent();
 
         }
 
+        private Configuration GetServiceConfiguration()
+        {
+            try
+            {
+                IRCSWCFService client = myChannelFactory.CreateChannel();
+                string serviceExePath = client.GetExePath();
+                return ConfigurationManager.OpenExeConfiguration(serviceExePath);
+            } catch
+            {
+                return null;
+            }
+            
+        }
+
         private TrendGroupConfig GetTrendGroupsConfig()
         {
-            IRCSWCFService client = myChannelFactory.CreateChannel();
-            string serviceExePath = client.GetExePath();
-            Configuration config = ConfigurationManager.OpenExeConfiguration(serviceExePath);
-            return (TrendGroupConfig)config.GetSection("trendGroupsConfig");
+            try
+            {
+                Configuration config = GetServiceConfiguration();
+                return (TrendGroupConfig)config.GetSection("trendGroupsConfig");
+
+            } catch
+            {
+                return (new TrendGroupConfig ());
+            }
+
+
         }
 
         private void GetSqlClientConnectionCredentials()
@@ -44,7 +63,7 @@ namespace IC.RCS.RCSForm
             {
                 IRCSWCFService client = myChannelFactory.CreateChannel();
                 string serviceExePath = client.GetExePath();
-                Configuration config = ConfigurationManager.OpenExeConfiguration(serviceExePath);
+                Configuration config = GetServiceConfiguration();
 
                 txtSQLServer.Text = config.AppSettings.Settings["servername"].Value;
                 txtSQLUsername.Text = config.AppSettings.Settings["username"].Value;
@@ -58,63 +77,78 @@ namespace IC.RCS.RCSForm
 
         private void SetSqlClientConnectionCredentials(string serverName, string databaseName, string userName, string password)
         {
-            IRCSWCFService client = myChannelFactory.CreateChannel();
-            string serviceExePath = client.GetExePath();
-            Configuration config = ConfigurationManager.OpenExeConfiguration(serviceExePath);
+            //TODO:use this after checking that the credentials work to set the credentials used by the service and restart it
+            try
+            {
+                Configuration config = GetServiceConfiguration();
 
-            config.AppSettings.Settings["servername"].Value = txtSQLServer.Text;
-            config.AppSettings.Settings["username"].Value = txtSQLUsername.Text;
-            config.AppSettings.Settings["password"].Value = txtSQLPassword.Text;
+                config.AppSettings.Settings["servername"].Value = txtSQLServer.Text;
+                config.AppSettings.Settings["username"].Value = txtSQLUsername.Text;
+                config.AppSettings.Settings["password"].Value = txtSQLPassword.Text;
 
-            config.Save();
+                config.Save();
+            } catch 
+            { 
+            
+            }
+           
         }
 
         private void ConvertTrendGroupConfigToDataGridView()
         {
-            dataGridViewTrendGroups.Rows.Clear();
-
-            RCSCore.TrendGroupConfig trendGroupsConfig = GetTrendGroupsConfig();
-
-            int i = 0;
-            foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+            try
             {
-                dataGridViewTrendGroups.Rows.Add();
-                dataGridViewTrendGroups.Rows[i].Cells[0].Value = trendGroup.IsMonitored == "true" ? true : false;
-                dataGridViewTrendGroups.Rows[i].Cells[1].Value = trendGroup.Name;
-                dataGridViewTrendGroups.Rows[i].Cells[2].Value = trendGroup.ScanRate;
-                dataGridViewTrendGroups.Rows[i].Cells[3].Value = trendGroup.Description;
-                dataGridViewTrendGroups.Rows[i].Cells[4].Value = trendGroup.Guid;
-                dataGridViewTrendGroups.Rows[i].Cells[5].Value = trendGroup.LastRefreshTime;
+                dataGridViewTrendGroups.Rows.Clear();
+
+                TrendGroupConfig trendGroupsConfig = GetTrendGroupsConfig();
+
+                int i = 0;
+                foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+                {
+                    dataGridViewTrendGroups.Rows.Add();
+                    dataGridViewTrendGroups.Rows[i].Cells[0].Value = trendGroup.IsMonitored == "true" ? true : false;
+                    dataGridViewTrendGroups.Rows[i].Cells[1].Value = trendGroup.Name;
+                    dataGridViewTrendGroups.Rows[i].Cells[2].Value = trendGroup.ScanRate;
+                    dataGridViewTrendGroups.Rows[i].Cells[3].Value = trendGroup.PullDays;
+                    dataGridViewTrendGroups.Rows[i].Cells[4].Value = trendGroup.Description;
+                    dataGridViewTrendGroups.Rows[i].Cells[5].Value = trendGroup.Guid;
+                    dataGridViewTrendGroups.Rows[i].Cells[6].Value = trendGroup.LastRefreshTime;
 
 
-                i++;
+                    i++;
+                }
+            } catch
+            {
+
             }
+            
 
         }
 
         private void ConvertDataGridViewtoTrendGroupConfig()
         {
-            IRCSWCFService client = myChannelFactory.CreateChannel();
-            string serviceExePath = client.GetExePath();
-
-            Configuration config = ConfigurationManager.OpenExeConfiguration(serviceExePath);
-            TrendGroupConfig trendGroupsConfig = (TrendGroupConfig)config.GetSection("trendGroupsConfig");
-
-
-            int i = 0;
-
-            foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+            try
             {
-                trendGroup.IsMonitored = dataGridViewTrendGroups.Rows[i].Cells[0].Value.ToString().ToLower();
-                trendGroup.ScanRate = dataGridViewTrendGroups.Rows[i].Cells[2].Value.ToString().ToLower();
-                //dataGridViewTrendGroups.Rows[i].Cells[1].Value = trendGroup.Name;
-                //dataGridViewTrendGroups.Rows[i].Cells[2].Value = trendGroup.Description;
-                //dataGridViewTrendGroups.Rows[i].Cells[3].Value = trendGroup.Guid;
-                //dataGridViewTrendGroups.Rows[i].Cells[4].Value = trendGroup.LastRefreshTime;
+                Configuration config = GetServiceConfiguration();
+                TrendGroupConfig trendGroupsConfig = (TrendGroupConfig)config.GetSection("trendGroupsConfig");
 
-                i++;
+                int i = 0;
+
+                foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+                {
+                    trendGroup.IsMonitored = dataGridViewTrendGroups.Rows[i].Cells[0].Value.ToString().ToLower();
+                    trendGroup.ScanRate = dataGridViewTrendGroups.Rows[i].Cells[2].Value.ToString().ToLower();
+                    trendGroup.PullDays = dataGridViewTrendGroups.Rows[i].Cells[3].Value.ToString().ToLower();
+
+                    i++;
+                }
+                config.Save();
             }
-            config.Save();
+            catch
+            {
+
+            }
+            
         }
 
         private ServiceConnectionStatusEnum CheckServiceConnection()
@@ -134,7 +168,7 @@ namespace IC.RCS.RCSForm
             try
             {
                 var trendGroupsConfig = GetTrendGroupsConfig();
-                foreach (RCSCore.TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+                foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
                 {
                     System.Diagnostics.Debug.WriteLine("{0},{1},{2},{3}", trendGroup.Guid, trendGroup.Name, trendGroup.Description, trendGroup.IsMonitored);
                 }
@@ -155,7 +189,7 @@ namespace IC.RCS.RCSForm
         private void CheckServiceSqlConnection()
         {
             string connectionStatusText;
-            string username = txtSQLUsername.Text;
+            string userName = txtSQLUsername.Text;
             string password = txtSQLPassword.Text;
             string serverName = txtSQLServer.Text;
 
@@ -164,8 +198,9 @@ namespace IC.RCS.RCSForm
             if (serviceConnectionStatus == ServiceConnectionStatusEnum.Connected)
             {
                 IRCSWCFService client = myChannelFactory.CreateChannel();
-                if (client.ConfigureSQLConnection(serverName, "ehtplus", username, password))
+                if (client.TestSQLCredentials(serverName, "ehtplus", userName, password))
                 {
+                    SetSqlClientConnectionCredentials(serverName, "ehtplus", userName, password);
                     connectionStatusText = "Connected";
                 }
                 else
@@ -220,10 +255,18 @@ namespace IC.RCS.RCSForm
 
         private void RCSForm_Load(object sender, EventArgs e)
         {
+            myChannelFactory = new ChannelFactory<IRCSWCFService>(new NetNamedPipeBinding(), new EndpointAddress("net.pipe://localhost/RCSTransferService/RCSTransferService"));
 
+            RCSFormWCFService formService = new RCSFormWCFService(txtBoxLog);
+
+            _formServiceHost = new ServiceHost(formService, new Uri[] { new Uri("net.pipe://localhost/RCSTransferForm") });
+            _formServiceHost.Description.Behaviors.Find<ServiceBehaviorAttribute>().InstanceContextMode = InstanceContextMode.Single;
+            _formServiceHost.AddServiceEndpoint(typeof(IRCSFormWCFService), new NetNamedPipeBinding(), "RCSTransferForm");
+
+            _formServiceHost.Open();
         }
 
-        private void RCSForm_Activated(object sender, EventArgs e)
+        private void RCSForm_Shown(object sender, EventArgs e)
         {
             buttonCheckServiceConnection.PerformClick();
             CheckServiceSqlConnection();
@@ -410,14 +453,22 @@ namespace IC.RCS.RCSForm
 
         private void buttonTrendGroupsPullFromSQL_Click(object sender, EventArgs e)
         {
-            string username = txtSQLUsername.Text;
-            string password = txtSQLPassword.Text;
-            string serverName = txtSQLServer.Text;
-            string databaseName = "ehtplus";
+            try
+            {
+                string username = txtSQLUsername.Text;
+                string password = txtSQLPassword.Text;
+                string serverName = txtSQLServer.Text;
+                string databaseName = "ehtplus";
 
-            IRCSWCFService client = myChannelFactory.CreateChannel();
-            client.PullTrendGroupsFromSQL(serverName, databaseName, username, password);
-            ConvertTrendGroupConfigToDataGridView();
+                IRCSWCFService client = myChannelFactory.CreateChannel();
+                client.PullTrendGroupsFromSQL(serverName, databaseName, username, password);
+                ConvertTrendGroupConfigToDataGridView();
+            }
+            catch
+            {
+
+            }
+            
         }
     }
 }

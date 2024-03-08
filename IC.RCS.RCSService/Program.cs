@@ -20,7 +20,7 @@ namespace IC.RCS.RCSService
     {
         static void Main(string[] args)
         {
-            bool IsDebugState = false;
+            bool IsDebugState = true;
 
             if (Environment.UserInteractive && !IsDebugState)
             {
@@ -52,17 +52,12 @@ namespace IC.RCS.RCSService
 
                     //System.Diagnostics.Debugger.Launch();
                     Console.WriteLine("Debug mode...");
-                    EHTSQLClient sqlClient = new EHTSQLClient(".\\SQLExpress", "ehtplus", "ehtTransferService", "ehtTransferService");
-
-                    TrendGroupConfigReaderWriter trendGroupConfigReaderWriter = new TrendGroupConfigReaderWriter(null);
-                    RCSWCFService wcfService = new RCSWCFService();
-
-
-                    ServiceHost host = new ServiceHost(typeof(RCSWCFService), new Uri[] { new Uri("net.pipe://localhost") });
-                    host.AddServiceEndpoint(typeof(IRCSWCFService), new NetNamedPipeBinding(), "PipeReverse");
+                    
+                    RCSWCFService service = new RCSWCFService();
+                    ServiceHost host = new ServiceHost(service, new Uri[] { new Uri("net.pipe://localhost/RCSTransferService") });
+                    host.Description.Behaviors.Find<ServiceBehaviorAttribute>().InstanceContextMode = InstanceContextMode.Single;
+                    host.AddServiceEndpoint(typeof(IRCSWCFService), new NetNamedPipeBinding(), "RCSTransferService");
                     host.Open();
-
-                    Console.WriteLine("Done. Press enter to close.");
                     Console.ReadLine();
 
                 }

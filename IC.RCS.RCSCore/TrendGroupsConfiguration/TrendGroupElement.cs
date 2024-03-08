@@ -81,5 +81,18 @@ namespace IC.RCS.RCSCore
                 base["scanrate"] = value.ToString();
             }
         }
+
+        [ConfigurationProperty("pulldays", IsRequired = true)]
+        public string PullDays
+        {
+            get
+            {
+                return (string)base["pulldays"];
+            }
+            set
+            {
+                base["pulldays"] = value.ToString();
+            }
+        }
     }
 }

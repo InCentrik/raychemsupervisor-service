@@ -18,11 +18,13 @@ namespace IC.RCS.RCSCore
     public class TransferServiceCore
     {
         public Configuration config;
-        public ChannelFactory<IRCSWCFService> myChannelFactory = new ChannelFactory<IRCSWCFService>(new NetNamedPipeBinding(), new EndpointAddress("net.pipe://localhost/PipeReverse"));
+        public ChannelFactory<IRCSWCFService> _serviceChannelFactory = new ChannelFactory<IRCSWCFService>(new NetNamedPipeBinding(), new EndpointAddress("net.pipe://localhost/RCSTransferService/RCSTransferService"));
         string serverName;
         string databaseName;
         string userName;
         string password;
+
+        private ChannelFactory<IRCSFormWCFService> _formChannelFactory = new ChannelFactory<IRCSFormWCFService>(new NetNamedPipeBinding(), new EndpointAddress("net.pipe://localhost/RCSTransferForm/RCSTransferForm"));
 
         TrendGroupConfig trendGroupConfig;
         EHTSQLClient sqlClient;
@@ -36,6 +38,22 @@ namespace IC.RCS.RCSCore
         {
             Stopped,
             Started
+        }
+
+        public void LogMessage(string message)
+        {
+            System.Diagnostics.Debug.WriteLine(message);
+            //Create output to form and to file in configuration
+            try
+            {
+                IRCSFormWCFService channel = _formChannelFactory.CreateChannel();
+                channel.LogForm(message);
+            } catch (Exception exc)
+            {
+                System.Diagnostics.Debug.WriteLine(exc.ToString());
+            }
+            
+
         }
 
         public TransferServiceCore()
@@ -89,6 +107,7 @@ namespace IC.RCS.RCSCore
             if (status == ServiceStatus.Started)
             {
                 cancellationTokenSource.Cancel();
+                status = ServiceStatus.Stopped;
             }
         }
 
@@ -107,11 +126,12 @@ namespace IC.RCS.RCSCore
 
             string name = trendGroupElement.Name;
             int scanRate = int.Parse(trendGroupElement.ScanRate);
+            int pullDays = int.Parse(trendGroupElement.PullDays);
 
             string trendGroupTableName = sqlClient.GetFakeTrendGroupTableName(guid);
             while (true)
             {
-                Console.WriteLine("ROUND");
+                LogMessage("ROUND");
 
                 EHTDeviceIDData[] devices = new EHTDeviceIDData[0];
                 sqlClient.GetTrendDevicesIdDataByTrendGroup(guid, out devices);
@@ -121,16 +141,16 @@ namespace IC.RCS.RCSCore
 
                 if (sqlClient.IsDBTableExists(trendGroupTableName))
                     sqlClient.RemoveBigTrendDataTableByName(trendGroupTableName);
-                sqlClient.RemoveBigTrendDataTableByName(trendGroupTableName);
                 sqlClient.CreateFakeTrendTable(guid);
 
-                //TODO ADD TRENDLOGOPTIONS TO READ IF SMALL DATASET
+                //NOTE useSmallDataset makes a subset of data to be transferred in GetBigTrendDeviceTrendDataByTime. Doesn't seem necessary at this point.
+
                 bool useSmallDataset = false;
 
-                //add maxrecord
-                int maxRecords = 10000;
+                //NOTE maximum number of rows that will be pulled from table
+                int maxRecords = 1000000000;
 
-                DateTime startTime = DateTime.UtcNow.Subtract(new TimeSpan(90, 0, 0, 0));
+                DateTime startTime = DateTime.UtcNow.Subtract(new TimeSpan(pullDays, 0, 0, 0));
 
                 bool readOldData = true;
                 foreach (EHTDeviceIDData device in devices)
@@ -141,45 +161,50 @@ namespace IC.RCS.RCSCore
                     {
                         //TODO: Throw error or skip if trendData.TrendData is null
                         //NOTE:Any new device types will require changing source code below. Automation or user form submission to add more cases may be possible.
-                        switch (device.DeviceType)
+                        
+                        if (trendData.TrendData != null)
                         {
-                            case EHTDeviceTypeConstants.HTCDIRECT:
-                            case EHTDeviceTypeConstants.HTC:
-                                if (useSmallDataset)
-                                    sqlClient.AddtinyHTCTrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTCValues)trendData.TrendData, trendData.TrendDateTime);
-                                else
-                                    sqlClient.AddHTCTrendData(deviceGuidString, trendGroupTableName, (EHTHTCValues)trendData.TrendData, trendData.TrendDateTime);
-                                break;
-                            case EHTDeviceTypeConstants.HTC2:
-                                if (useSmallDataset)
-                                    sqlClient.AddtinyHTC2TrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTC2Values)trendData.TrendData, trendData.TrendDateTime);
-                                else
-                                    sqlClient.AddHTC2TrendData(deviceGuidString, trendGroupTableName, (EHTHTC2Values)trendData.TrendData, trendData.TrendDateTime);
-                                break;
-                            case EHTDeviceTypeConstants.HTC2P3:
-                                if (useSmallDataset)
-                                    sqlClient.AddtinyHTC3TrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTC2Values3P)trendData.TrendData, trendData.TrendDateTime);
-                                else
-                                    sqlClient.AddHTC3TrendData(deviceGuidString, trendGroupTableName, (EHTHTC2Values3P)trendData.TrendData, trendData.TrendDateTime);
-                                break;
-                            case EHTDeviceTypeConstants.M3KIO:
-                                if (useSmallDataset)
-                                    sqlClient.AddtinyIOTrendData(deviceGuidString, trendGroupTableName, (tinyM3KIOValues)trendData.TrendData, trendData.TrendDateTime);
-                                else
-                                    sqlClient.AddIOTrendData(deviceGuidString, trendGroupTableName, (M3KIOValues)trendData.TrendData, trendData.TrendDateTime);
-                                break;
-                            case EHTDeviceTypeConstants.M3KLIMITER:
-                                if (useSmallDataset)
-                                    sqlClient.AddtinySLIMTrendData(deviceGuidString, trendGroupTableName, (tinyM3KLimiterValues)trendData.TrendData, trendData.TrendDateTime);
-                                else
-                                    sqlClient.AddSLIMTrendData(deviceGuidString, trendGroupTableName, (M3KLimiterValues)trendData.TrendData, trendData.TrendDateTime);
-                                break;
-                            case EHTDeviceTypeConstants.LOOP2:
-                                if (useSmallDataset)
-                                    sqlClient.AddtinyNGC30Circuit2TrendData(deviceGuidString, trendGroupTableName, (tinyEHTCircuit2Values)trendData.TrendData, trendData.TrendDateTime);
-                                else
-                                    sqlClient.AddNGC30Circuit2TrendData(deviceGuidString, trendGroupTableName, (EHTCircuit2Values)trendData.TrendData, trendData.TrendDateTime);
-                                break;
+                            switch (device.DeviceType)
+                            {
+                                case EHTDeviceTypeConstants.HTCDIRECT:
+                                case EHTDeviceTypeConstants.HTC:
+                                    if (useSmallDataset)
+                                        sqlClient.AddtinyHTCTrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTCValues)trendData.TrendData, trendData.TrendDateTime);
+                                    else
+                                        sqlClient.AddHTCTrendData(deviceGuidString, trendGroupTableName, (EHTHTCValues)trendData.TrendData, trendData.TrendDateTime);
+                                    break;
+                                case EHTDeviceTypeConstants.HTC2:
+                                    if (useSmallDataset)
+                                        sqlClient.AddtinyHTC2TrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTC2Values)trendData.TrendData, trendData.TrendDateTime);
+                                    else
+                                        sqlClient.AddHTC2TrendData(deviceGuidString, trendGroupTableName, (EHTHTC2Values)trendData.TrendData, trendData.TrendDateTime);
+                                    break;
+                                case EHTDeviceTypeConstants.HTC2P3:
+                                    if (useSmallDataset)
+                                        sqlClient.AddtinyHTC3TrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTC2Values3P)trendData.TrendData, trendData.TrendDateTime);
+                                    else
+                                        sqlClient.AddHTC3TrendData(deviceGuidString, trendGroupTableName, (EHTHTC2Values3P)trendData.TrendData, trendData.TrendDateTime);
+                                    break;
+                                case EHTDeviceTypeConstants.M3KIO:
+                                    if (useSmallDataset)
+                                        sqlClient.AddtinyIOTrendData(deviceGuidString, trendGroupTableName, (tinyM3KIOValues)trendData.TrendData, trendData.TrendDateTime);
+                                    else
+                                        sqlClient.AddIOTrendData(deviceGuidString, trendGroupTableName, (M3KIOValues)trendData.TrendData, trendData.TrendDateTime);
+                                    break;
+                                case EHTDeviceTypeConstants.M3KLIMITER:
+                                    if (useSmallDataset)
+                                        sqlClient.AddtinySLIMTrendData(deviceGuidString, trendGroupTableName, (tinyM3KLimiterValues)trendData.TrendData, trendData.TrendDateTime);
+                                    else
+                                        sqlClient.AddSLIMTrendData(deviceGuidString, trendGroupTableName, (M3KLimiterValues)trendData.TrendData, trendData.TrendDateTime);
+                                    break;
+                                case EHTDeviceTypeConstants.LOOP2:
+                                    if (useSmallDataset)
+                                        sqlClient.AddtinyNGC30Circuit2TrendData(deviceGuidString, trendGroupTableName, (tinyEHTCircuit2Values)trendData.TrendData, trendData.TrendDateTime);
+                                    else
+                                        sqlClient.AddNGC30Circuit2TrendData(deviceGuidString, trendGroupTableName, (EHTCircuit2Values)trendData.TrendData, trendData.TrendDateTime);
+                                    break;
+                            }
+
                         }
                     }
                 }
