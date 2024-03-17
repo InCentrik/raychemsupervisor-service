@@ -16,6 +16,7 @@ namespace IC.RCS.RCSService
     {
         public RCSCore.EHTSQLClient sqlClient;
         public ServiceHost host;
+        private RCSLogHandler _logger = new RCSLogHandler("Service");
 
         public RCSTransferService()
         {
@@ -24,12 +25,22 @@ namespace IC.RCS.RCSService
 
         protected override void OnStart(string[] args)
         {
-            RCSWCFService service = new RCSWCFService();
+            try
+            {
+                RCSWCFService service = new RCSWCFService();
 
-            host = new ServiceHost(service, new Uri[] { new Uri("net.pipe://localhost") });
-            host.Description.Behaviors.Find<ServiceBehaviorAttribute>().InstanceContextMode = InstanceContextMode.Single;
-            host.AddServiceEndpoint(typeof(IRCSWCFService), new NetNamedPipeBinding(), "RCSTransferService");
-            host.Open();
+                ServiceHost host = new ServiceHost(service, new Uri[] { new Uri("net.pipe://localhost/RCSTransferService") });
+                host.Description.Behaviors.Find<ServiceBehaviorAttribute>().InstanceContextMode = InstanceContextMode.Single;
+                host.AddServiceEndpoint(typeof(IRCSWCFService), new NetNamedPipeBinding(), "RCSTransferService");
+
+                host.Open();
+
+                _logger.Log(RCSLogLevel.Information, "RCS transfer service started");
+            } catch
+            {
+
+            }
+            
 
         }
 
@@ -37,8 +48,10 @@ namespace IC.RCS.RCSService
         {
             try 
             { 
-                host.Close(); 
-            } catch 
+                host.Close();
+                _logger.Log(RCSLogLevel.Information, "RCS transfer service stopped");
+            }
+            catch 
             { 
             
             }

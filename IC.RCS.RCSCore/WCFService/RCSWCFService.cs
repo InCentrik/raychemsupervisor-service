@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.ServiceModel;
-using System.Text;
-using IC.RCS.RCSCore;
+﻿using System.Data;
 using System.Configuration;
-using System.Security.Cryptography.X509Certificates;
 
 namespace IC.RCS.RCSCore
 {
@@ -74,6 +66,8 @@ namespace IC.RCS.RCSCore
                     if (trendGroup.Guid == guid)
                     {
                         guidExists = true;
+                        trendGroup.Name = name;
+                        trendGroup.Description = description;
                     }
                 }
 
@@ -88,12 +82,13 @@ namespace IC.RCS.RCSCore
                     trendGroup.ScanRate = scanrate;
 
                     trendGroupsConfig.TrendGroups.Add(trendGroup);
-                    config.Save();
                 }
-                
+
+                config.Save();
+
             }
 
-            
+
 
         }
 

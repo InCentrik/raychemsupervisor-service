@@ -1,7 +1,4 @@
-# raychemsupervisor-service
- Solution for IMTT for deserializing Raychem Supervisor heat trace data.
-
-Raychem Supervisor Transfer Service
+﻿Raychem Supervisor Transfer Service
 For IMTT
 Developed by InCentrik 3.8.2024
 
@@ -35,6 +32,6 @@ C. Configure the service manually
 
 D. Uninstall the RCS Transfer Service
 	1. Open command prompt as an administrator
-	4. Enter command: sc stop RCSTransferService
-	2. Enter command: cd PathToRCSTransferServiceFolder
-	3. Enter command: IC.RCS.RCSService --uninstall	
+	2. Enter command: sc stop RCSTransferService
+	3. Enter command: cd PathToRCSTransferServiceFolder
+	4. Enter command: IC.RCS.RCSService --uninstall	

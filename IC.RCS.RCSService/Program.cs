@@ -20,7 +20,7 @@ namespace IC.RCS.RCSService
     {
         static void Main(string[] args)
         {
-            bool IsDebugState = true;
+            bool IsDebugState = false;
 
             if (Environment.UserInteractive && !IsDebugState)
             {
@@ -51,13 +51,16 @@ namespace IC.RCS.RCSService
                 {
 
                     //System.Diagnostics.Debugger.Launch();
-                    Console.WriteLine("Debug mode...");
-                    
+                    RCSLogHandler logger = new RCSLogHandler("ServiceDebugger");
                     RCSWCFService service = new RCSWCFService();
+                    logger.Log(RCSLogLevel.Information,"Debug mode...");
+
                     ServiceHost host = new ServiceHost(service, new Uri[] { new Uri("net.pipe://localhost/RCSTransferService") });
                     host.Description.Behaviors.Find<ServiceBehaviorAttribute>().InstanceContextMode = InstanceContextMode.Single;
                     host.AddServiceEndpoint(typeof(IRCSWCFService), new NetNamedPipeBinding(), "RCSTransferService");
+
                     host.Open();
+                    logger.Log(RCSLogLevel.Information, "RCS transfer service started");
                     Console.ReadLine();
 
                 }

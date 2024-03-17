@@ -17,7 +17,12 @@ namespace IC.RCS.RCSCore
 
         public void LogForm(string message)
         {
-            _formBox.Text = message;
+            _formBox.Text += "\n"+message;
+            if (!_formBox.Focused)
+            {
+                _formBox.SelectionStart = _formBox.Text.Length;
+                _formBox.ScrollToCaret();
+            }
         }
     }
 }

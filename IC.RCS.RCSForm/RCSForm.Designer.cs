@@ -33,7 +33,6 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.txtPathToLogDirectory = new System.Windows.Forms.Label();
             this.buttonChooseLogFolderDirectory = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.serviceConnectionStatusText = new System.Windows.Forms.Label();
             this.buttonCheckServiceConnection = new System.Windows.Forms.Button();
@@ -63,9 +62,6 @@
             this.buttonTrendGroupsRefresh = new System.Windows.Forms.Button();
             this.tabLog = new System.Windows.Forms.TabPage();
             this.txtBoxLog = new System.Windows.Forms.RichTextBox();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripProgressBar1 = new System.Windows.Forms.ToolStripProgressBar();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -83,14 +79,12 @@
             this.tabTrendGroups.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTrendGroups)).BeginInit();
             this.tabLog.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
             this.panel1.Controls.Add(this.tabControl1);
-            this.panel1.Controls.Add(this.statusStrip1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 26);
             this.panel1.Margin = new System.Windows.Forms.Padding(2);
@@ -109,7 +103,7 @@
             this.tabControl1.Multiline = true;
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(806, 404);
+            this.tabControl1.Size = new System.Drawing.Size(806, 431);
             this.tabControl1.TabIndex = 1;
             // 
             // tabService
@@ -121,7 +115,7 @@
             this.tabService.Margin = new System.Windows.Forms.Padding(2);
             this.tabService.Name = "tabService";
             this.tabService.Padding = new System.Windows.Forms.Padding(2);
-            this.tabService.Size = new System.Drawing.Size(798, 375);
+            this.tabService.Size = new System.Drawing.Size(798, 376);
             this.tabService.TabIndex = 0;
             this.tabService.Text = "Service";
             this.tabService.UseVisualStyleBackColor = true;
@@ -130,7 +124,6 @@
             // 
             this.groupBox3.Controls.Add(this.txtPathToLogDirectory);
             this.groupBox3.Controls.Add(this.buttonChooseLogFolderDirectory);
-            this.groupBox3.Controls.Add(this.checkBox1);
             this.groupBox3.Location = new System.Drawing.Point(36, 267);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(744, 101);
@@ -141,7 +134,7 @@
             // txtPathToLogDirectory
             // 
             this.txtPathToLogDirectory.AutoSize = true;
-            this.txtPathToLogDirectory.Location = new System.Drawing.Point(270, 60);
+            this.txtPathToLogDirectory.Location = new System.Drawing.Point(270, 50);
             this.txtPathToLogDirectory.Name = "txtPathToLogDirectory";
             this.txtPathToLogDirectory.Size = new System.Drawing.Size(144, 16);
             this.txtPathToLogDirectory.TabIndex = 5;
@@ -149,23 +142,13 @@
             // 
             // buttonChooseLogFolderDirectory
             // 
-            this.buttonChooseLogFolderDirectory.Location = new System.Drawing.Point(36, 57);
+            this.buttonChooseLogFolderDirectory.Location = new System.Drawing.Point(36, 47);
             this.buttonChooseLogFolderDirectory.Name = "buttonChooseLogFolderDirectory";
             this.buttonChooseLogFolderDirectory.Size = new System.Drawing.Size(189, 23);
             this.buttonChooseLogFolderDirectory.TabIndex = 10;
             this.buttonChooseLogFolderDirectory.Text = "Choose log folder directory";
             this.buttonChooseLogFolderDirectory.UseVisualStyleBackColor = true;
             this.buttonChooseLogFolderDirectory.Click += new System.EventHandler(this.buttonChooseLogFolderDirectory_Click);
-            // 
-            // checkBox1
-            // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Location = new System.Drawing.Point(36, 31);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(189, 20);
-            this.checkBox1.TabIndex = 9;
-            this.checkBox1.Text = "Save log to folder directory";
-            this.checkBox1.UseVisualStyleBackColor = true;
             // 
             // groupBox2
             // 
@@ -249,7 +232,7 @@
             this.groupBox1.Size = new System.Drawing.Size(744, 109);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Database connection";
+            this.groupBox1.Text = "Database Connection";
             // 
             // sqlConnectionStatusText
             // 
@@ -344,7 +327,7 @@
             this.tabTrendGroups.Margin = new System.Windows.Forms.Padding(2);
             this.tabTrendGroups.Name = "tabTrendGroups";
             this.tabTrendGroups.Padding = new System.Windows.Forms.Padding(2);
-            this.tabTrendGroups.Size = new System.Drawing.Size(798, 375);
+            this.tabTrendGroups.Size = new System.Drawing.Size(798, 402);
             this.tabTrendGroups.TabIndex = 1;
             this.tabTrendGroups.Text = "Trend Groups";
             // 
@@ -367,7 +350,7 @@
             this.dataGridViewTrendGroups.Name = "dataGridViewTrendGroups";
             this.dataGridViewTrendGroups.RowHeadersWidth = 51;
             this.dataGridViewTrendGroups.RowTemplate.Height = 24;
-            this.dataGridViewTrendGroups.Size = new System.Drawing.Size(767, 313);
+            this.dataGridViewTrendGroups.Size = new System.Drawing.Size(767, 351);
             this.dataGridViewTrendGroups.TabIndex = 4;
             // 
             // trendGroupSelected
@@ -459,7 +442,7 @@
             this.tabLog.Location = new System.Drawing.Point(4, 25);
             this.tabLog.Margin = new System.Windows.Forms.Padding(2);
             this.tabLog.Name = "tabLog";
-            this.tabLog.Size = new System.Drawing.Size(798, 375);
+            this.tabLog.Size = new System.Drawing.Size(798, 402);
             this.tabLog.TabIndex = 2;
             this.tabLog.Text = "Log";
             this.tabLog.UseVisualStyleBackColor = true;
@@ -470,33 +453,9 @@
             this.txtBoxLog.Location = new System.Drawing.Point(0, 0);
             this.txtBoxLog.Margin = new System.Windows.Forms.Padding(2);
             this.txtBoxLog.Name = "txtBoxLog";
-            this.txtBoxLog.Size = new System.Drawing.Size(798, 375);
+            this.txtBoxLog.Size = new System.Drawing.Size(798, 402);
             this.txtBoxLog.TabIndex = 0;
-            this.txtBoxLog.Text = "";
-            // 
-            // statusStrip1
-            // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(28, 28);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1,
-            this.toolStripProgressBar1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 404);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 10, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(806, 27);
-            this.statusStrip1.TabIndex = 0;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // toolStripStatusLabel1
-            // 
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(52, 21);
-            this.toolStripStatusLabel1.Text = "Status:";
-            // 
-            // toolStripProgressBar1
-            // 
-            this.toolStripProgressBar1.Name = "toolStripProgressBar1";
-            this.toolStripProgressBar1.Size = new System.Drawing.Size(73, 19);
+            this.txtBoxLog.Text = "Log start...";
             // 
             // menuStrip1
             // 
@@ -570,11 +529,10 @@
             this.Name = "RCSForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Raychem Supervisor Trend Data Table Transfer Utility";
-            this.Shown += new System.EventHandler(this.RCSForm_Shown);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RCSForm_FormClosing);
             this.Load += new System.EventHandler(this.RCSForm_Load);
+            this.Shown += new System.EventHandler(this.RCSForm_Shown);
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabService.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
@@ -586,8 +544,6 @@
             this.tabTrendGroups.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewTrendGroups)).EndInit();
             this.tabLog.ResumeLayout(false);
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -601,7 +557,6 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabService;
         private System.Windows.Forms.TabPage tabTrendGroups;
-        private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
@@ -609,8 +564,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtSQLServer;
         private System.Windows.Forms.Button buttonCheckSQLConnection;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.ToolStripMenuItem operationToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startToolStripMenuItem;
         private System.Windows.Forms.TabPage tabLog;
@@ -630,7 +583,6 @@
         private System.Windows.Forms.DataGridView dataGridViewTrendGroups;
         private System.Windows.Forms.Button buttonTrendGroupsPullFromSQL;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.Button buttonChooseLogFolderDirectory;
         private System.Windows.Forms.Button buttonCheckServiceConnection;

@@ -5,21 +5,15 @@ using System.ServiceModel;
 using IC.RCS.RCSCore;
 using System.Configuration;
 using System.ServiceProcess;
-using System.Data;
-using System.Text;
-using System.Drawing.Text;
-using System.CodeDom;
-using static System.Net.Mime.MediaTypeNames;
-using System.ServiceModel.Security;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace IC.RCS.RCSForm
 {
     public partial class RCSForm : Form
     {
-        public ChannelFactory<IRCSWCFService> myChannelFactory;
+        public ChannelFactory<IRCSWCFService> serviceChannelFactory;
         public ServiceController serviceController = new ServiceController("RCSTransferService");
         private ServiceHost _formServiceHost;
+        private RCSLogHandler _logger = new RCSLogHandler("Form");
 
         public RCSForm()
         {
@@ -32,14 +26,16 @@ namespace IC.RCS.RCSForm
         {
             try
             {
-                IRCSWCFService client = myChannelFactory.CreateChannel();
+                IRCSWCFService client = serviceChannelFactory.CreateChannel();
                 string serviceExePath = client.GetExePath();
                 return ConfigurationManager.OpenExeConfiguration(serviceExePath);
-            } catch
+            }
+            catch (Exception ex)
             {
+                _logger.Log(RCSLogLevel.Error, "Unable to get service configuration");
                 return null;
             }
-            
+
         }
 
         private TrendGroupConfig GetTrendGroupsConfig()
@@ -47,11 +43,20 @@ namespace IC.RCS.RCSForm
             try
             {
                 Configuration config = GetServiceConfiguration();
-                return (TrendGroupConfig)config.GetSection("trendGroupsConfig");
+                if (config != null)
+                {
+                    return (TrendGroupConfig)config.GetSection("trendGroupsConfig");
+                }
+                else
+                {
+                    return null;
+                }
 
-            } catch
+            }
+            catch (Exception ex)
             {
-                return (new TrendGroupConfig ());
+                _logger.Log(RCSLogLevel.Error, "Unable to get trend groups configuration");
+                return null;
             }
 
 
@@ -61,18 +66,19 @@ namespace IC.RCS.RCSForm
         {
             try
             {
-                IRCSWCFService client = myChannelFactory.CreateChannel();
+                IRCSWCFService client = serviceChannelFactory.CreateChannel();
                 string serviceExePath = client.GetExePath();
                 Configuration config = GetServiceConfiguration();
 
                 txtSQLServer.Text = config.AppSettings.Settings["servername"].Value;
                 txtSQLUsername.Text = config.AppSettings.Settings["username"].Value;
                 txtSQLPassword.Text = config.AppSettings.Settings["password"].Value;
-            } catch
-            {
-
             }
-            
+            catch (Exception ex)
+            {
+                _logger.Log(RCSLogLevel.Error, "Unable to get SQL client credentials");
+            }
+
         }
 
         private void SetSqlClientConnectionCredentials(string serverName, string databaseName, string userName, string password)
@@ -86,12 +92,13 @@ namespace IC.RCS.RCSForm
                 config.AppSettings.Settings["username"].Value = txtSQLUsername.Text;
                 config.AppSettings.Settings["password"].Value = txtSQLPassword.Text;
 
-                config.Save();
-            } catch 
-            { 
-            
+                config.Save(ConfigurationSaveMode.Modified);
             }
-           
+            catch (Exception ex)
+            {
+                _logger.Log(RCSLogLevel.Error, "Unable to set SQL client credentials");
+            }
+
         }
 
         private void ConvertTrendGroupConfigToDataGridView()
@@ -102,26 +109,31 @@ namespace IC.RCS.RCSForm
 
                 TrendGroupConfig trendGroupsConfig = GetTrendGroupsConfig();
 
-                int i = 0;
-                foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+                if (trendGroupsConfig != null)
                 {
-                    dataGridViewTrendGroups.Rows.Add();
-                    dataGridViewTrendGroups.Rows[i].Cells[0].Value = trendGroup.IsMonitored == "true" ? true : false;
-                    dataGridViewTrendGroups.Rows[i].Cells[1].Value = trendGroup.Name;
-                    dataGridViewTrendGroups.Rows[i].Cells[2].Value = trendGroup.ScanRate;
-                    dataGridViewTrendGroups.Rows[i].Cells[3].Value = trendGroup.PullDays;
-                    dataGridViewTrendGroups.Rows[i].Cells[4].Value = trendGroup.Description;
-                    dataGridViewTrendGroups.Rows[i].Cells[5].Value = trendGroup.Guid;
-                    dataGridViewTrendGroups.Rows[i].Cells[6].Value = trendGroup.LastRefreshTime;
+                    int i = 0;
+                    foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+                    {
+                        dataGridViewTrendGroups.Rows.Add();
+                        dataGridViewTrendGroups.Rows[i].Cells[0].Value = trendGroup.IsMonitored == "true" ? true : false;
+                        dataGridViewTrendGroups.Rows[i].Cells[1].Value = trendGroup.Name;
+                        dataGridViewTrendGroups.Rows[i].Cells[2].Value = trendGroup.ScanRate;
+                        dataGridViewTrendGroups.Rows[i].Cells[3].Value = trendGroup.PullDays;
+                        dataGridViewTrendGroups.Rows[i].Cells[4].Value = trendGroup.Description;
+                        dataGridViewTrendGroups.Rows[i].Cells[5].Value = trendGroup.Guid;
+                        dataGridViewTrendGroups.Rows[i].Cells[6].Value = trendGroup.LastRefreshTime;
 
 
-                    i++;
+                        i++;
+                    }
                 }
-            } catch
-            {
 
             }
-            
+            catch (Exception ex)
+            {
+                _logger.Log(RCSLogLevel.Error, "Unable to populate trend group table");
+            }
+
 
         }
 
@@ -142,23 +154,24 @@ namespace IC.RCS.RCSForm
 
                     i++;
                 }
-                config.Save();
+                config.Save(ConfigurationSaveMode.Modified);
             }
-            catch
+            catch (Exception ex)
             {
-
+                _logger.Log(RCSLogLevel.Error, "Unable to set service trend groups configuration");
             }
-            
+
         }
 
         private ServiceConnectionStatusEnum CheckServiceConnection()
         {
-            bool serviceOn = true;
-            bool wcfServiceConnected = true;
+            bool serviceOn = false;
+            bool wcfServiceConnected = false;
 
             try
             {
                 bool canStop = serviceController.CanStop;
+                serviceOn = true;
             }
             catch
             {
@@ -168,15 +181,19 @@ namespace IC.RCS.RCSForm
             try
             {
                 var trendGroupsConfig = GetTrendGroupsConfig();
-                foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+                if (trendGroupsConfig != null)
                 {
-                    System.Diagnostics.Debug.WriteLine("{0},{1},{2},{3}", trendGroup.Guid, trendGroup.Name, trendGroup.Description, trendGroup.IsMonitored);
+                    foreach (TrendGroupElement trendGroup in trendGroupsConfig.TrendGroups)
+                    {
+                        System.Diagnostics.Debug.WriteLine("{0},{1},{2},{3}", trendGroup.Guid, trendGroup.Name, trendGroup.Description, trendGroup.IsMonitored);
+                    }
+                    wcfServiceConnected = true;
                 }
-                wcfServiceConnected = true;
+                serviceOn = true;
             }
             catch (Exception ex)
             {
-                serviceOn = false;
+
             }
 
             int serviceOnInt = serviceOn ? 1 : 0;
@@ -197,7 +214,7 @@ namespace IC.RCS.RCSForm
 
             if (serviceConnectionStatus == ServiceConnectionStatusEnum.Connected)
             {
-                IRCSWCFService client = myChannelFactory.CreateChannel();
+                IRCSWCFService client = serviceChannelFactory.CreateChannel();
                 if (client.TestSQLCredentials(serverName, "ehtplus", userName, password))
                 {
                     SetSqlClientConnectionCredentials(serverName, "ehtplus", userName, password);
@@ -255,7 +272,7 @@ namespace IC.RCS.RCSForm
 
         private void RCSForm_Load(object sender, EventArgs e)
         {
-            myChannelFactory = new ChannelFactory<IRCSWCFService>(new NetNamedPipeBinding(), new EndpointAddress("net.pipe://localhost/RCSTransferService/RCSTransferService"));
+            serviceChannelFactory = new ChannelFactory<IRCSWCFService>(new NetNamedPipeBinding(), new EndpointAddress("net.pipe://localhost/RCSTransferService/RCSTransferService"));
 
             RCSFormWCFService formService = new RCSFormWCFService(txtBoxLog);
 
@@ -271,6 +288,7 @@ namespace IC.RCS.RCSForm
             buttonCheckServiceConnection.PerformClick();
             CheckServiceSqlConnection();
             GetSqlClientConnectionCredentials();
+            GetLogFolderDirectory();
             ConvertTrendGroupConfigToDataGridView();
 
         }
@@ -400,12 +418,50 @@ namespace IC.RCS.RCSForm
         }
         #endregion
 
+        private void GetLogFolderDirectory()
+        {
+            try
+            {
+                Configuration config = GetServiceConfiguration();
+                if (config != null)
+                {
+                    txtPathToLogDirectory.Text = config.AppSettings.Settings["logfilepath"].Value;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+
+        private void SetLogFolderDirectory(string path)
+        {
+            try
+            {
+                Configuration config = GetServiceConfiguration();
+
+                if (config != null)
+                {
+                    config.AppSettings.Settings["logfilepath"].Value = path;
+                    config.Save(ConfigurationSaveMode.Modified);
+                    txtPathToLogDirectory.Text = folderBrowserDialog1.SelectedPath;
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
 
         private void buttonChooseLogFolderDirectory_Click(object sender, EventArgs e)
         {
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                txtPathToLogDirectory.Text = folderBrowserDialog1.SelectedPath;
+
+                SetLogFolderDirectory(folderBrowserDialog1.SelectedPath);
+
             }
         }
 
@@ -460,7 +516,7 @@ namespace IC.RCS.RCSForm
                 string serverName = txtSQLServer.Text;
                 string databaseName = "ehtplus";
 
-                IRCSWCFService client = myChannelFactory.CreateChannel();
+                IRCSWCFService client = serviceChannelFactory.CreateChannel();
                 client.PullTrendGroupsFromSQL(serverName, databaseName, username, password);
                 ConvertTrendGroupConfigToDataGridView();
             }
@@ -468,7 +524,18 @@ namespace IC.RCS.RCSForm
             {
 
             }
-            
+
+        }
+
+        private void txtBoxLog_GotFocus(object sender, EventArgs e)
+        {
+            try
+            {
+                _logger.Log(RCSLogLevel.Information, "GOT FOCUS");
+            } catch
+            {
+
+            }
         }
     }
 }
