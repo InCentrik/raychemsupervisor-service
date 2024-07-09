@@ -107,36 +107,56 @@ namespace IC.RCS.RCSCore
 
         public void GetTrendGroupConfig()
         {
+            config = null;
+            trendGroupConfig = null;
             config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             trendGroupConfig = (TrendGroupConfig)config.GetSection("trendGroupsConfig");
         }
 
         public void TransferTrendGroupData(string guidString)
         {
+
             Guid guid = new Guid(guidString);
-            GetTrendGroupConfig();
 
-            TrendGroupElement trendGroupElement = trendGroupConfig.TrendGroups[guidString];
 
-            string name = trendGroupElement.Name;
-            int scanRate = int.Parse(trendGroupElement.ScanRate);
-            int pullDays = int.Parse(trendGroupElement.PullDays);
+            string fakeTrendGroupTableName = sqlClient.GetFakeTrendGroupTableName(guid);
+            string trendGroupTableName = sqlClient.GetTrendGroupTableName(guid);
 
-            string trendGroupTableName = sqlClient.GetFakeTrendGroupTableName(guid);
             while (true)
             {
+                
+                GetTrendGroupConfig();
+                TrendGroupElement trendGroupElement = trendGroupConfig.TrendGroups[guidString];
+
+                string name = trendGroupElement.Name;
+                RCSLogHandler trendLogger = new RCSLogHandler(name);
+
+                //NOTE TODO This did not throw an error as expected if reading an empty string
+                int scanRate = int.Parse(trendGroupElement.ScanRate);
+                int pullDays = int.Parse(trendGroupElement.PullDays);
                 try
                 {
-                    _logger.Log(RCSLogLevel.Information, name + ": transfer initiated");
+
+                    if (!sqlClient.IsDBTableExists(trendGroupTableName))
+                    {
+                        trendLogger.Log(RCSLogLevel.Warning, "Trend group table not found");
+                        return;
+                    }
+
 
                     EHTDeviceIDData[] devices = new EHTDeviceIDData[0];
                     sqlClient.GetTrendDevicesIdDataByTrendGroup(guid, out devices);
 
+                    if (devices == null || devices.Length == 0)
+                    {
+                        trendLogger.Log(RCSLogLevel.Warning, "No devices found for trend group in dbo.TrendDevice");
+                        return;
+                    }
 
-                    //TODO insert remove table if exists if needed, add faketrend table if needed
-
-                    if (sqlClient.IsDBTableExists(trendGroupTableName))
-                        sqlClient.RemoveBigTrendDataTableByName(trendGroupTableName);
+                    if (sqlClient.IsDBTableExists(fakeTrendGroupTableName))
+                    {
+                        sqlClient.RemoveBigTrendDataTableByName(fakeTrendGroupTableName);
+                    }
                     sqlClient.CreateFakeTrendTable(guid);
 
                     //NOTE useSmallDataset makes a subset of data to be transferred in GetBigTrendDeviceTrendDataByTime. Doesn't seem necessary at this point.
@@ -151,6 +171,7 @@ namespace IC.RCS.RCSCore
                     bool readOldData = false;
                     cancellationTokenSource.Token.ThrowIfCancellationRequested();
 
+                    trendLogger.Log(RCSLogLevel.Information, "Transfer initiated");
                     foreach (EHTDeviceIDData device in devices)
                     {
                         cancellationTokenSource.Token.ThrowIfCancellationRequested();
@@ -167,61 +188,63 @@ namespace IC.RCS.RCSCore
                                     case EHTDeviceTypeConstants.HTCDIRECT:
                                     case EHTDeviceTypeConstants.HTC:
                                         if (useSmallDataset)
-                                            sqlClient.AddtinyHTCTrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTCValues)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddtinyHTCTrendData(deviceGuidString, fakeTrendGroupTableName, (tinyEHTHTCValues)trendData.TrendData, trendData.TrendDateTime);
                                         else
-                                            sqlClient.AddHTCTrendData(deviceGuidString, trendGroupTableName, (EHTHTCValues)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddHTCTrendData(deviceGuidString, fakeTrendGroupTableName, (EHTHTCValues)trendData.TrendData, trendData.TrendDateTime);
                                         break;
                                     case EHTDeviceTypeConstants.HTC2:
                                         if (useSmallDataset)
-                                            sqlClient.AddtinyHTC2TrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTC2Values)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddtinyHTC2TrendData(deviceGuidString, fakeTrendGroupTableName, (tinyEHTHTC2Values)trendData.TrendData, trendData.TrendDateTime);
                                         else
-                                            sqlClient.AddHTC2TrendData(deviceGuidString, trendGroupTableName, (EHTHTC2Values)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddHTC2TrendData(deviceGuidString, fakeTrendGroupTableName, (EHTHTC2Values)trendData.TrendData, trendData.TrendDateTime);
                                         break;
                                     case EHTDeviceTypeConstants.HTC2P3:
                                         if (useSmallDataset)
-                                            sqlClient.AddtinyHTC3TrendData(deviceGuidString, trendGroupTableName, (tinyEHTHTC2Values3P)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddtinyHTC3TrendData(deviceGuidString, fakeTrendGroupTableName, (tinyEHTHTC2Values3P)trendData.TrendData, trendData.TrendDateTime);
                                         else
-                                            sqlClient.AddHTC3TrendData(deviceGuidString, trendGroupTableName, (EHTHTC2Values3P)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddHTC3TrendData(deviceGuidString, fakeTrendGroupTableName, (EHTHTC2Values3P)trendData.TrendData, trendData.TrendDateTime);
                                         break;
                                     case EHTDeviceTypeConstants.M3KIO:
                                         if (useSmallDataset)
-                                            sqlClient.AddtinyIOTrendData(deviceGuidString, trendGroupTableName, (tinyM3KIOValues)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddtinyIOTrendData(deviceGuidString, fakeTrendGroupTableName, (tinyM3KIOValues)trendData.TrendData, trendData.TrendDateTime);
                                         else
-                                            sqlClient.AddIOTrendData(deviceGuidString, trendGroupTableName, (M3KIOValues)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddIOTrendData(deviceGuidString, fakeTrendGroupTableName, (M3KIOValues)trendData.TrendData, trendData.TrendDateTime);
                                         break;
                                     case EHTDeviceTypeConstants.M3KLIMITER:
                                         if (useSmallDataset)
-                                            sqlClient.AddtinySLIMTrendData(deviceGuidString, trendGroupTableName, (tinyM3KLimiterValues)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddtinySLIMTrendData(deviceGuidString, fakeTrendGroupTableName, (tinyM3KLimiterValues)trendData.TrendData, trendData.TrendDateTime);
                                         else
-                                            sqlClient.AddSLIMTrendData(deviceGuidString, trendGroupTableName, (M3KLimiterValues)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddSLIMTrendData(deviceGuidString, fakeTrendGroupTableName, (M3KLimiterValues)trendData.TrendData, trendData.TrendDateTime);
                                         break;
                                     case EHTDeviceTypeConstants.LOOP2:
                                         if (useSmallDataset)
-                                            sqlClient.AddtinyNGC30Circuit2TrendData(deviceGuidString, trendGroupTableName, (tinyEHTCircuit2Values)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddtinyNGC30Circuit2TrendData(deviceGuidString, fakeTrendGroupTableName, (tinyEHTCircuit2Values)trendData.TrendData, trendData.TrendDateTime);
                                         else
-                                            sqlClient.AddNGC30Circuit2TrendData(deviceGuidString, trendGroupTableName, (EHTCircuit2Values)trendData.TrendData, trendData.TrendDateTime);
+                                            sqlClient.AddNGC30Circuit2TrendData(deviceGuidString, fakeTrendGroupTableName, (EHTCircuit2Values)trendData.TrendData, trendData.TrendDateTime);
                                         break;
                                 }
                             }
                         }
                     }
 
+                    GetTrendGroupConfig();
                     trendGroupElement.LastRefreshTime = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
                     config.Save(ConfigurationSaveMode.Modified);
-
-                    GetTrendGroupConfig();
-                    trendGroupElement = trendGroupConfig.TrendGroups[guidString];
+                    //TODO: create mechanism for getting config, editing it, then saving it. And retry attempts when it doesn't work.
 
 
-                    _logger.Log(RCSLogLevel.Information, name + ": transfer completed");
+
+                    trendLogger.Log(RCSLogLevel.Information, "Transfer completed");
                 }
-                catch (OperationCanceledException) { 
-                    _logger.Log(RCSLogLevel.Information, name + ": transfer stopped");
+                catch (OperationCanceledException)
+                {
+                    trendLogger.Log(RCSLogLevel.Information, "Transfer stopped");
                 }
                 catch (Exception exc)
                 {
-                    _logger.Log(RCSLogLevel.Error, exc);
-                } finally
+                    trendLogger.Log(RCSLogLevel.Error, exc);
+                }
+                finally
                 {
                     Thread.Sleep(scanRate * 1000);
                 }

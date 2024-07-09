@@ -9,6 +9,7 @@ namespace IC.RCS.RCSCore
     public enum RCSLogLevel
     {
         Information,
+        Warning,
         Error
     }
 }

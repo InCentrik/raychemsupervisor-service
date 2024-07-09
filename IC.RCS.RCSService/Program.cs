@@ -43,7 +43,7 @@ namespace IC.RCS.RCSService
                     ServiceBase[] ServicesToRun;
                     ServicesToRun = new ServiceBase[]
                     {
-                new RCSTransferService()
+                        new RCSTransferService()
                     };
                     ServiceBase.Run(ServicesToRun);
                 }
@@ -53,19 +53,17 @@ namespace IC.RCS.RCSService
                     //System.Diagnostics.Debugger.Launch();
                     RCSLogHandler logger = new RCSLogHandler("ServiceDebugger");
                     RCSWCFService service = new RCSWCFService();
-                    logger.Log(RCSLogLevel.Information,"Debug mode...");
+                    logger.Log(RCSLogLevel.Information, "Debug mode...");
 
                     ServiceHost host = new ServiceHost(service, new Uri[] { new Uri("net.pipe://localhost/RCSTransferService") });
                     host.Description.Behaviors.Find<ServiceBehaviorAttribute>().InstanceContextMode = InstanceContextMode.Single;
                     host.AddServiceEndpoint(typeof(IRCSWCFService), new NetNamedPipeBinding(), "RCSTransferService");
-
                     host.Open();
-                    logger.Log(RCSLogLevel.Information, "RCS transfer service started");
                     Console.ReadLine();
 
                 }
             }
-            
+
 
         }
 

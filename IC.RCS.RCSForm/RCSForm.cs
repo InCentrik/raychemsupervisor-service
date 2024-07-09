@@ -93,6 +93,8 @@ namespace IC.RCS.RCSForm
                 config.AppSettings.Settings["password"].Value = txtSQLPassword.Text;
 
                 config.Save(ConfigurationSaveMode.Modified);
+
+                config = null;
             }
             catch (Exception ex)
             {
@@ -155,6 +157,8 @@ namespace IC.RCS.RCSForm
                     i++;
                 }
                 config.Save(ConfigurationSaveMode.Modified);
+
+                config = null;
             }
             catch (Exception ex)
             {
@@ -446,6 +450,7 @@ namespace IC.RCS.RCSForm
                     config.AppSettings.Settings["logfilepath"].Value = path;
                     config.Save(ConfigurationSaveMode.Modified);
                     txtPathToLogDirectory.Text = folderBrowserDialog1.SelectedPath;
+                    config = null;
                 }
 
             }

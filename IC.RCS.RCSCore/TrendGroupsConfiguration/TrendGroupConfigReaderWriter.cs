@@ -31,6 +31,7 @@ namespace IC.RCS.RCSCore
                 dr["IsMonitored"] = trendGroup.IsMonitored;
                 dr["LastRefreshTime"] = trendGroup.LastRefreshTime;
                 dr["ScanRate"] = trendGroup.ScanRate;
+                dr["PullDays"] = trendGroup.PullDays;
 
                 dt.Rows.Add(dr);
 

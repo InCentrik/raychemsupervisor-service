@@ -45,6 +45,7 @@ namespace IC.RCS.RCSCore
             string ismonitored;
             string lastrefreshtime;
             string scanrate;
+            string pulldays;
 
             Configuration config = ConfigurationManager.OpenExeConfiguration(0);
             TrendGroupConfig trendGroupsConfig = (TrendGroupConfig)config.GetSection("trendGroupsConfig");
@@ -58,6 +59,7 @@ namespace IC.RCS.RCSCore
                 ismonitored = "false";
                 lastrefreshtime = "1970/01/01 00:00:00";
                 scanrate = "60";
+                pulldays = "90";
 
 
                 bool guidExists = false;
@@ -80,6 +82,7 @@ namespace IC.RCS.RCSCore
                     trendGroup.IsMonitored = ismonitored;
                     trendGroup.LastRefreshTime = lastrefreshtime;
                     trendGroup.ScanRate = scanrate;
+                    trendGroup.PullDays = pulldays;
 
                     trendGroupsConfig.TrendGroups.Add(trendGroup);
                 }
@@ -88,6 +91,8 @@ namespace IC.RCS.RCSCore
 
             }
 
+            config = null;
+            trendGroupsConfig = null;
 
 
         }
