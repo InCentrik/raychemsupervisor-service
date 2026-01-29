@@ -153,6 +153,60 @@ namespace IC.RCS.RCSCore
             return rowsAffected;
         }
 
+        public bool HasNullRows(string tableName)
+        {
+
+            string query = "SELECT * From " + tableName;
+
+            SqlConnection Conn = new SqlConnection(GetConnectionString());
+            SqlCommand Cmd = new SqlCommand(query, Conn);
+
+            using (SqlDataReader reader = Cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    int nonNullCount = 0;
+
+                    for (int i = 0; i < reader.FieldCount; i++)
+                    {
+                        if (!reader.IsDBNull(i))
+                        {
+                            nonNullCount++;
+                            continue;
+                        }
+                    }
+
+                    if (nonNullCount == 1)
+                    {
+                        return true;
+                    }
+
+                }
+            }
+            return false;
+
+
+        }
+
+        public void CreateTableCSV(string tableName, string filePath)
+        {
+            string query = "SELECT * From " + tableName;
+
+            SqlConnection Conn = new SqlConnection(GetConnectionString());
+            SqlCommand Cmd = new SqlCommand(query, Conn);
+
+            using (SqlDataReader reader = Cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+
+                }
+            }
+
+        }
+
+
+
         public int TransferDeserializeEHTData(Guid trendgroupId)
         {
             int rowsAffected = 0;
@@ -294,7 +348,7 @@ namespace IC.RCS.RCSCore
             //Returns the type of each value in the device model
             Type ehtDeviceModelType = typeof(EHT.EHTDeviceModel.tinyEHTHTC2Values3P);
             var test = ehtDeviceModelType.GetFields().Select(field => field.Name);
-            List<string> typesStrings = (List<string>) ehtDeviceModelType.GetFields().Select(field => field.Name).ToList();
+            List<string> typesStrings = (List<string>)ehtDeviceModelType.GetFields().Select(field => field.Name).ToList();
 
             return typesStrings;
 
@@ -305,7 +359,7 @@ namespace IC.RCS.RCSCore
             //Calls sp, but will this SP always exist?
             SqlConnection Conn = new SqlConnection(GetConnectionString());
             SqlCommand Cmd = Conn.CreateCommand();
-            Cmd.CommandText = "Select * From "+databaseName+".dbo.EHTTrendGroup";
+            Cmd.CommandText = "Select * From " + databaseName + ".dbo.EHTTrendGroup";
             Cmd.CommandType = CommandType.Text;
 
             SqlDataAdapter SqlDA = new SqlDataAdapter();
